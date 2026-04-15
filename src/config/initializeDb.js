@@ -14,7 +14,7 @@ const __dirname = path.dirname(__filename);
 const initializeApp = async () => {
   try {
     // Path to the SQL file
-    const sqlPath = path.join(__dirname, "../../../hotel_management.sql");
+    const sqlPath = path.join(__dirname, "../../hotel_management.sql");
 
     // Read the SQL file
     const sql = await fs.readFile(sqlPath, "utf8");
@@ -58,7 +58,7 @@ const initializeApp = async () => {
           `${adminUser}@example.com`,
           "123-456-7890",
           "123 Admin St",
-          "default_profile.jpg",
+          "default_profile.png",
         ]
       );
 

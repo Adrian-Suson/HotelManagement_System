@@ -341,8 +341,25 @@ router.post(
         throw new Error("Reservation not found.");
       }
 
+      // Get room rate to calculate total_rate
+      const [roomData] = await connection.query(
+        "SELECT rate FROM rooms WHERE id = ?",
+        [reservationData[0].room_id]
+      );
+
+      if (roomData.length === 0) {
+        throw new Error("Room not found.");
+      }
+
+      const checkInDate = new Date(reservationData[0].check_in);
+      const checkOutDate = new Date(reservationData[0].check_out);
+      const nights = Math.ceil(
+        (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+      );
+      const totalRate = roomData[0].rate * nights;
+
       await connection.query(
-        "INSERT INTO stay_records (room_id, guest_id, check_in, check_out, adults, kids) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO stay_records (room_id, guest_id, check_in, check_out, adults, kids, total_rate) VALUES (?, ?, ?, ?, ?, ?, ?)",
         [
           reservationData[0].room_id,
           reservationData[0].guest_id,
@@ -350,6 +367,7 @@ router.post(
           reservationData[0].check_out,
           reservationData[0].adults,
           reservationData[0].kids,
+          totalRate,
         ]
       );
 

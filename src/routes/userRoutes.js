@@ -101,7 +101,7 @@ router.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const baseEmail = `${username}@example.com`; // Base email
-    const imageName = "default_profile.jpg"; // Set default profile picture
+    const imageName = "default_profile.png"; // Set default profile picture
 
     // Check if email already exists and generate a new one if necessary
     let email = baseEmail;
@@ -316,7 +316,7 @@ router.put(
       await db.query(query, params);
 
       // Delete the old image if a new image is uploaded
-      if (imageName && oldImage && oldImage !== "default_profile.jpg") {
+      if (imageName && oldImage && oldImage !== "default_profile.png") {
         fs.unlink(
           path.join(__dirname, "..", "..", "assets", "ProfilePic", oldImage),
           (err) => {
@@ -370,7 +370,7 @@ router.delete("/profile/:userId", async (req, res) => {
       await db.query("DELETE FROM user_profile WHERE user_id = ?", [userId]);
 
       // Delete the image file from the filesystem
-      if (imageUrl && imageUrl !== "default_profile.jpg") {
+      if (imageUrl && imageUrl !== "default_profile.png") {
         fs.unlink(
           path.join(__dirname, "..", "..", "assets", "ProfilePic", imageUrl),
           (err) => {

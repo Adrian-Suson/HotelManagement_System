@@ -305,9 +305,26 @@ router.post(
       // Create a stay record using the guest ID
       const parsedCheckIn = new Date(check_in);
       const parsedCheckOut = new Date(check_out);
+
+      // Get room rate to calculate total_rate
+      const [roomData] = await db.query(
+        "SELECT rate FROM rooms WHERE id = ?",
+        [room_id]
+      );
+
+      if (roomData.length === 0) {
+        throw new Error("Room not found.");
+      }
+
+      const roomRate = roomData[0].rate;
+      const nights = Math.ceil(
+        (parsedCheckOut - parsedCheckIn) / (1000 * 60 * 60 * 24)
+      );
+      const totalRate = roomRate * nights;
+
       const [stayRecordResult] = await db.query(
-        "INSERT INTO stay_records (room_id, guest_id, check_in, check_out, adults, kids) VALUES (?, ?, ?, ?, ?, ?)",
-        [room_id, guestId, parsedCheckIn, parsedCheckOut, adults, kids]
+        "INSERT INTO stay_records (room_id, guest_id, check_in, check_out, adults, kids, total_rate) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [room_id, guestId, parsedCheckIn, parsedCheckOut, adults, kids, totalRate]
       );
 
       if (!stayRecordResult.insertId) {
@@ -450,9 +467,28 @@ router.post(
       const parsedCheckIn = new Date(check_in);
       const parsedCheckOut = new Date(check_out);
 
+      // Get room rate to calculate total_rate
+      const [roomData] = await db.query(
+        "SELECT rate FROM rooms WHERE id = ?",
+        [room_id]
+      );
+
+      if (roomData.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Room not found.",
+        });
+      }
+
+      const roomRate = roomData[0].rate;
+      const nights = Math.ceil(
+        (parsedCheckOut - parsedCheckIn) / (1000 * 60 * 60 * 24)
+      );
+      const totalRate = roomRate * nights;
+
       const [stayRecordResult] = await db.query(
-        "INSERT INTO stay_records (room_id, guest_id, check_in, check_out, adults, kids) VALUES (?, ?, ?, ?, ?, ?)",
-        [room_id, guestId, parsedCheckIn, parsedCheckOut, adults, kids]
+        "INSERT INTO stay_records (room_id, guest_id, check_in, check_out, adults, kids, total_rate) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [room_id, guestId, parsedCheckIn, parsedCheckOut, adults, kids, totalRate]
       );
 
       if (!stayRecordResult.insertId) {
