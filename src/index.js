@@ -30,15 +30,33 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(helmet());
+app.use(helmet({
+  strictTransportSecurity: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
 app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
-// Serve public app
-app.use(express.static(path.join(__dirname, "..", "public")));
+// Serve public app with correct MIME types
+app.use(express.static(path.join(__dirname, "..", "public"), {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    } else if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    }
+  }
+}));
 
 // API Routes
 app.use("/api", userRoutes);
