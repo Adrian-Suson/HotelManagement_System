@@ -34,9 +34,22 @@ router.post("/stay_records/:stayRecordId/services", async (req, res) => {
   const { service_list_id, price } = req.body;
 
   try {
+    // Get service details from service_list
+    const [serviceList] = await db.query(
+      "SELECT name, description FROM service_list WHERE id = ?",
+      [service_list_id]
+    );
+
+    if (serviceList.length === 0) {
+      return res.status(404).json({ success: false, message: "Service not found." });
+    }
+
+    const serviceName = serviceList[0].name;
+    const serviceDescription = serviceList[0].description;
+
     await db.query(
-      "INSERT INTO services (service_list_id, price, stay_record_id) VALUES (?, ?, ?)",
-      [service_list_id, price, stayRecordId]
+      "INSERT INTO services (service_list_id, name, price, description, stay_record_id) VALUES (?, ?, ?, ?, ?)",
+      [service_list_id, serviceName, price, serviceDescription, stayRecordId]
     );
 
     const [services] = await db.query(
